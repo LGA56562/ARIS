@@ -3,140 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARIS v0.3.1</title>
+<title>ARIS v0.3.2</title>
 
 <style>
-body{
- margin:0;
- font-family:sans-serif;
- background:#f5f5f5;
- color:#333;
-}
+body{margin:0;font-family:sans-serif;background:#f5f5f5}
 
-/* モーダル（最前面） */
+/* モーダル */
 #modal{
- position:fixed;
- top:0;left:0;
- width:100%;height:100%;
+ position:fixed;top:0;left:0;width:100%;height:100%;
  background:rgba(0,0,0,.6);
- display:flex;
- justify-content:center;
- align-items:center;
+ display:flex;justify-content:center;align-items:center;
  z-index:9999;
 }
-.modalBox{
- background:#fff;
- padding:20px;
- border-radius:10px;
- width:80%;
-}
-
-/* タイトル */
-header{padding:10px;font-size:20px}
+.modalBox{background:#fff;padding:20px;border-radius:10px;width:80%}
 
 /* タブ */
 .tabs{display:flex;border-bottom:1px solid #ccc}
 .tab{padding:8px 14px;cursor:pointer}
-.tab.active{
- border-bottom:2px solid #007bff;
- font-weight:bold;
-}
-
-/* スペース */
-.topSpacer{height:10px}
+.tab.active{border-bottom:2px solid #007bff;font-weight:bold}
 
 /* カメラ */
 #cameraArea{
- width:90vw;height:90vw;
- margin:auto;
- background:#ddd;
- border-radius:10px;
- overflow:hidden;
- position:relative;
- z-index:1; /* モーダルより下 */
+ width:90vw;height:90vw;margin:auto;
+ background:#ddd;border-radius:10px;
+ position:relative;overflow:hidden;
 }
-video{
- width:100%;
- height:100%;
- object-fit:cover;
+video{width:100%;height:100%;object-fit:cover}
+
+#nosignal{
+ position:absolute;top:50%;left:50%;
+ transform:translate(-50%,-50%);
 }
 
-/* No Signal */
-#nosignal{
- position:absolute;
- top:50%;left:50%;
+/* レティクル */
+#reticle{
+ position:absolute;top:50%;left:50%;
+ width:60px;height:60px;
  transform:translate(-50%,-50%);
- color:#666;
+ display:none;
 }
+#reticle::before,#reticle::after{
+ content:"";position:absolute;background:#00ff00;
+}
+#reticle::before{width:100%;height:2px;top:50%}
+#reticle::after{height:100%;width:2px;left:50%}
 
 /* HUD */
 #hud{
- position:absolute;
- right:10px;
- bottom:10px;
- font-size:14px;
- background:rgba(255,255,255,0.6);
- padding:5px;
- border-radius:6px;
+ position:absolute;right:10px;bottom:10px;
+ background:rgba(255,255,255,.7);
+ padding:6px;border-radius:6px;
 }
 
 /* ボタン */
-.controls{
- display:flex;
- gap:10px;
- padding:10px;
-}
-.btn{
- flex:1;
- padding:10px;
- border-radius:8px;
- text-align:center;
-}
+.controls{display:flex;gap:10px;padding:10px}
+.btn{flex:1;padding:10px;border-radius:8px;text-align:center}
 .trigger{flex:2;font-weight:bold}
-
 .red{background:#dc3545;color:#fff}
 .green{background:#28a745;color:#fff}
 
-/* 計算欄 */
+/* 式 */
 #formula{
- margin:10px;
- padding:12px;
- background:#fff;
- border-radius:10px;
- font-size:16px;
-}
-
-/* 入力 */
-input{
- padding:8px;
- border-radius:6px;
- border:1px solid #ccc;
- width:80px;
+ margin:10px;padding:12px;
+ background:#fff;border-radius:10px;
 }
 
 /* オプション */
 #optionTab{display:none;padding:10px}
+.card{background:#fff;padding:10px;border-radius:10px;margin-top:10px}
+.optBtn{border:1px solid #ccc;padding:10px;margin-top:10px;border-radius:8px;text-align:center}
 
-.card{
- background:#fff;
- padding:10px;
- border-radius:10px;
- margin-top:10px;
-}
-.optBtn{
- background:#fff;
- border:1px solid #ccc;
- padding:10px;
- margin-top:10px;
- border-radius:8px;
+/* フッター */
+footer{
  text-align:center;
+ padding:10px;
+ font-size:12px;
+ color:#666;
 }
 </style>
 </head>
 
 <body>
 
-<!-- モーダル -->
 <div id="modal">
  <div class="modalBox">
   <h3>READMEの確認</h3>
@@ -146,14 +94,14 @@ input{
  </div>
 </div>
 
-<header>ARIS</header>
+<header style="padding:10px;font-size:20px;">ARIS</header>
 
 <div class="tabs">
  <div id="tabMain" class="tab active" onclick="tab('main')">メイン</div>
  <div id="tabOpt" class="tab" onclick="tab('opt')">オプション</div>
 </div>
 
-<div class="topSpacer"></div>
+<div style="height:10px"></div>
 
 <!-- メイン -->
 <div id="mainTab">
@@ -161,6 +109,7 @@ input{
 <div id="cameraArea">
  <video id="video" autoplay playsinline></video>
  <div id="nosignal">No Signal</div>
+ <div id="reticle"></div>
 
  <div id="hud">
   Range:<span id="hBL">--</span><br>
@@ -186,13 +135,8 @@ input{
 <!-- オプション -->
 <div id="optionTab">
 
-<div class="card">
- AL = <input id="al" value="10">
-</div>
-
-<div class="card">
- AE = <input id="ae" value="1.0">
-</div>
+<div class="card">AL = <input id="al" value="10"></div>
+<div class="card">AE = <input id="ae" value="1.0"></div>
 
 <div class="card">
  Roll:(<span id="fRoll"></span>)
@@ -206,14 +150,23 @@ input{
  CP:(<span id="cPitch"></span>)
 </div>
 
+<div class="optBtn" id="csvBtn">CSVデータダウンロード</div>
 <div class="optBtn" id="calBtn">キャリブレーション</div>
+<div class="optBtn" onclick="window.open('https://www.mod.go.jp/atla/')">フィードバック</div>
 
 </div>
+
+<footer>
+ ARIS-HE/M（仮） v0.3.2<br>
+ 作成者：LGA56562
+</footer>
 
 <script>
 let Roll=0,Yaw=0,Pitch=0;
 let CRoll=0,CYaw=0,CPitch=0;
 let sensorOK=false;
+
+let csv="date,time,Roll,Yaw,Pitch,CRoll,CYaw,CPitch,FPitch,BL,TAlti\n";
 
 function start(){modal.style.display="none"}
 
@@ -231,6 +184,7 @@ camBtn.onclick=async()=>{
  });
  video.srcObject=s;
  nosignal.style.display="none";
+ reticle.style.display="block";
  camBtn.className="btn green";
 };
 
@@ -255,14 +209,15 @@ function loop(){
  const AE=Number(ae.value)||0;
  const FPitch=Pitch+CPitch;
 
- const T=BL*Math.tan(FPitch*Math.PI/180);
+ const tanVal=Math.tan(FPitch*Math.PI/180);
+
  const RAL=((100*Math.tan((FPitch+AE)*Math.PI/180))/(100*Math.tan(FPitch*Math.PI/180))*100)-100;
 
  hBL.textContent=BL;
- hAlt.textContent=T.toFixed(1);
+ hAlt.textContent=(BL*tanVal).toFixed(1);
  hRal.textContent=RAL.toFixed(1);
 
- fpDisp.textContent=`${FPitch.toFixed(1)}°(${Math.tan(FPitch*Math.PI/180).toFixed(2)})`;
+ fpDisp.textContent=`${FPitch.toFixed(1)}°(${tanVal.toFixed(2)})`;
 
  fRoll.textContent=(Roll+CRoll).toFixed(1);
  fYaw.textContent=(Yaw+CYaw).toFixed(1);
@@ -281,6 +236,18 @@ mainBtn.onclick=()=>{
  const T=BL*Math.tan(FPitch*Math.PI/180);
 
  tAlti.textContent=T.toFixed(2);
+
+ const d=new Date();
+ csv+=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${FPitch},${BL},${T}\n`;
+};
+
+/* CSV */
+csvBtn.onclick=()=>{
+ const blob=new Blob([csv]);
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="log.csv";
+ a.click();
 };
 
 /* キャリブレーション */
