@@ -3,45 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARIS v0.2</title>
+<title>ARIS v0.3</title>
 
 <style>
-body{margin:0;background:#000;color:#0f0;font-family:sans-serif}
+body{
+ margin:0;
+ font-family:sans-serif;
+ background:#f5f5f5;
+ color:#222;
+}
 
 /* モーダル */
 #modal{
  position:fixed;top:0;left:0;width:100%;height:100%;
- background:rgba(0,0,0,.9);
+ background:rgba(0,0,0,.6);
  display:flex;justify-content:center;align-items:center;
  z-index:999;
 }
-.modalBox{background:#111;padding:20px;border:1px solid #0f0}
+.modalBox{
+ background:#fff;padding:20px;border-radius:8px;
+}
 
 /* タイトル */
-header{padding:8px;font-size:18px}
+header{padding:10px;font-size:18px}
 
 /* タブ */
-.tabs{display:flex;border-bottom:1px solid #0f0}
-.tab{
- padding:6px 12px;
- border:1px solid #0f0;
- cursor:pointer;
- font-size:14px;
+.tabs{
+ display:flex;
+ border-bottom:1px solid #ccc;
 }
-.tab.active{background:#020}
+.tab{
+ padding:8px 16px;
+ cursor:pointer;
+}
+.tab.active{
+ border-bottom:3px solid #007bff;
+ font-weight:bold;
+}
+
+/* カメラ上スペース */
+.topSpace{height:10px}
 
 /* カメラ */
 #cameraArea{
  width:90vw;height:90vw;margin:auto;
- background:#111;border:1px solid #0f0;
+ background:#ddd;
  position:relative;
 }
 video{width:100%;height:100%;object-fit:cover}
 
-/* No signal */
+/* No Signal */
 #nosignal{
  position:absolute;top:50%;left:50%;
  transform:translate(-50%,-50%);
+ color:#555;
 }
 
 /* レティクル */
@@ -52,7 +67,7 @@ video{width:100%;height:100%;object-fit:cover}
  display:none;
 }
 #reticle::before,#reticle::after{
- content:"";position:absolute;background:#0f0;
+ content:"";position:absolute;background:#00aa00;
 }
 #reticle::before{width:100%;height:2px;top:50%}
 #reticle::after{height:100%;width:2px;left:50%}
@@ -65,42 +80,43 @@ video{width:100%;height:100%;object-fit:cover}
 
 /* ボタン */
 .controls{
- display:flex;gap:8px;padding:8px;
+ display:flex;gap:10px;padding:10px;
 }
-.btn{
+button{
  flex:1;
  padding:10px;
- border:1px solid #0f0;
- text-align:center;
- display:flex;
- justify-content:center;
- align-items:center;
+ border-radius:6px;
+ border:1px solid #ccc;
+ background:#eee;
+ cursor:pointer;
 }
-.trigger{flex:2;font-size:16px;padding:14px}
-
-.red{background:#400;color:#faa;border-color:#f55}
-.green{background:#040;color:#afa;border-color:#5f5}
-
-/* 計算欄 */
-#formula{
- display:flex;
- align-items:center;
- gap:10px;
- padding:10px;
+#mainBtn{
+ flex:2;
  font-size:16px;
 }
-#formula input{width:80px;font-size:16px}
+
+/* 計算表示 */
+#formula{
+ padding:12px;
+ font-size:18px;
+ background:#fff;
+ margin:10px;
+ border-radius:6px;
+ text-align:center;
+}
 
 /* オプション */
-#optionTab{display:none;padding:10px;font-size:14px}
+#optionTab{display:none;padding:10px}
 
 .inline{margin-top:10px}
 
 .optBtn{
- border:1px solid #0f0;
- padding:10px;
  margin-top:10px;
+ padding:10px;
+ background:#eee;
+ border-radius:6px;
  text-align:center;
+ cursor:pointer;
 }
 </style>
 </head>
@@ -123,6 +139,8 @@ video{width:100%;height:100%;object-fit:cover}
  <div id="tabOpt" class="tab" onclick="tab('opt')">オプション</div>
 </div>
 
+<div class="topSpace"></div>
+
 <!-- メイン -->
 <div id="mainTab">
 
@@ -131,23 +149,19 @@ video{width:100%;height:100%;object-fit:cover}
  <div id="nosignal">No Signal</div>
  <div id="reticle"></div>
  <div id="hud">
-  range:<span id="hBL">--</span><br>
+  BL:<span id="hBL">--</span><br>
   Alt:<span id="hAlt">--</span><br>
-  MaxDev:<span id="hRal">--</span>
+  Dev:<span id="hRal">--</span>
  </div>
 </div>
 
 <div class="controls">
- <div id="camBtn" class="btn red">カメラ</div>
- <div id="sensorBtn" class="btn red">センサ</div>
- <div id="mainBtn" class="btn trigger red">センサを許可してください</div>
+ <button id="camBtn">カメラ</button>
+ <button id="sensorBtn">センサ</button>
+ <button id="mainBtn">センサを許可してください</button>
 </div>
 
-<div id="formula">
- <input id="bl" placeholder="BL">
- × <span id="tanVal">--</span>
- = <span id="tAlti">--</span>
-</div>
+<div id="formula">NaN</div>
 
 </div>
 
@@ -180,6 +194,8 @@ let camOK=false,sensorOK=false;
 let Roll=0,Yaw=0,Pitch=0;
 let CRoll=0,CYaw=0,CPitch=0;
 
+let lastT = NaN;
+
 let csv="date,time,Roll,Yaw,Pitch,CRoll,CYaw,CPitch,FPitch,BL,TAlti\n";
 
 function start(){modal.style.display="none"}
@@ -199,7 +215,6 @@ camBtn.onclick=async()=>{
  video.srcObject=s;
  nosignal.style.display="none";
  reticle.style.display="block";
- camBtn.className="btn green";
  camOK=true;
 };
 
@@ -214,29 +229,23 @@ sensorBtn.onclick=async()=>{
   Pitch=(e.beta||0)-90;
   Yaw=e.alpha||0;
  });
- sensorBtn.className="btn green";
  sensorOK=true;
 };
 
-/* メインループ（軽量化） */
+/* 更新 */
 function loop(){
-
- const BL=Number(bl.value)||0;
+ const BL=Number(bl?.value)||0;
  const AE=Number(ae.value)||0;
 
  const FRoll=Roll+CRoll;
  const FYaw=Yaw+CYaw;
  const FPitch=Pitch+CPitch;
 
- const tanValNum=Math.tan(FPitch*Math.PI/180);
- const T=BL*tanValNum;
- const RAL=(100*Math.tan((FPitch+AE)*Math.PI/180)) - 100;
-
- tanVal.textContent=tanValNum.toFixed(2);
- tAlti.textContent=T.toFixed(2);
+ const tanVal=Math.tan(FPitch*Math.PI/180);
+ const RAL=(100*Math.tan((FPitch+AE)*Math.PI/180))-100;
 
  hBL.textContent=BL;
- hAlt.textContent=T.toFixed(1);
+ hAlt.textContent=isNaN(lastT)?"--":lastT.toFixed(2);
  hRal.textContent=RAL.toFixed(1);
 
  fRoll.textContent=FRoll.toFixed(1);
@@ -247,33 +256,26 @@ function loop(){
  cYaw.textContent=CYaw.toFixed(1);
  cPitch.textContent=CPitch.toFixed(1);
 
- /* 色 */
- if(RAL>Number(al.value)){
-  hud.style.color="red";
-  reticle.style.filter="hue-rotate(300deg)";
-  formula.style.color="red";
- }else{
-  hud.style.color="#0f0";
-  reticle.style.filter="none";
-  formula.style.color="#0f0";
- }
-
- /* ボタン状態 */
- let active=false;
- if(sensorOK && bl.value) active=true;
-
- mainBtn.textContent= sensorOK ? (bl.value?"計測":"BL入力") : "センサ許可";
- mainBtn.className="btn trigger "+(active?"green":"red");
-
  requestAnimationFrame(loop);
 }
 loop();
 
 /* トリガー */
 mainBtn.onclick=()=>{
- if(mainBtn.className.includes("red"))return;
+ const BL=Number(bl.value);
+ if(!sensorOK || !BL) return;
+
+ const FPitch=Pitch+CPitch;
+ const tanVal=Math.tan(FPitch*Math.PI/180);
+ const T=BL*tanVal;
+
+ lastT=T;
+
+ formula.textContent =
+ `${BL} × ${FPitch.toFixed(1)}°(${tanVal.toFixed(2)}) = ${T.toFixed(2)}`;
+
  const d=new Date();
- csv+=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${Pitch+CPitch},${bl.value},${tAlti.textContent}\n`;
+ csv+=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${FPitch},${BL},${T}\n`;
 };
 
 /* CSV */
