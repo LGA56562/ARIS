@@ -211,7 +211,7 @@ sensorBtn.onclick=async()=>{
  }
  window.addEventListener("deviceorientation",e=>{
   Roll=e.gamma||0;
-  Pitch=(e.beta||0)+90;
+  Pitch=(e.beta||0)-90;
   Yaw=e.alpha||0;
  });
  sensorBtn.className="btn green";
