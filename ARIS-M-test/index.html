@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARIS v0.1</title>
+<title>ARIS v0.2</title>
 
 <style>
 body{margin:0;background:#000;color:#0f0;font-family:sans-serif}
@@ -18,24 +18,17 @@ body{margin:0;background:#000;color:#0f0;font-family:sans-serif}
 .modalBox{background:#111;padding:20px;border:1px solid #0f0}
 
 /* タイトル */
-header{padding:10px;font-size:20px}
+header{padding:8px;font-size:18px}
 
 /* タブ */
 .tabs{display:flex;border-bottom:1px solid #0f0}
 .tab{
- padding:10px;
+ padding:6px 12px;
  border:1px solid #0f0;
  cursor:pointer;
+ font-size:14px;
 }
-.tab.active{
- background:#020;
- font-weight:bold;
-}
-
-/* カメラ上余白 */
-.topSpacer{
- height:10px;
-}
+.tab.active{background:#020}
 
 /* カメラ */
 #cameraArea{
@@ -45,6 +38,7 @@ header{padding:10px;font-size:20px}
 }
 video{width:100%;height:100%;object-fit:cover}
 
+/* No signal */
 #nosignal{
  position:absolute;top:50%;left:50%;
  transform:translate(-50%,-50%);
@@ -65,47 +59,42 @@ video{width:100%;height:100%;object-fit:cover}
 
 /* HUD */
 #hud{
- position:absolute;
- right:10px;bottom:10px;
+ position:absolute;right:10px;bottom:10px;
  font-size:14px;
 }
 
 /* ボタン */
 .controls{
- display:flex;gap:10px;padding:10px;
+ display:flex;gap:8px;padding:8px;
 }
 .btn{
  flex:1;
- padding:12px;
+ padding:10px;
  border:1px solid #0f0;
  text-align:center;
+ display:flex;
+ justify-content:center;
+ align-items:center;
 }
-.trigger{flex:2;font-size:18px;padding:16px}
+.trigger{flex:2;font-size:16px;padding:14px}
 
 .red{background:#400;color:#faa;border-color:#f55}
 .green{background:#040;color:#afa;border-color:#5f5}
 
-/* 式 */
+/* 計算欄 */
 #formula{
  display:flex;
  align-items:center;
  gap:10px;
  padding:10px;
- border-top:1px solid #0f0;
+ font-size:16px;
 }
-#formula input{width:80px}
+#formula input{width:80px;font-size:16px}
 
 /* オプション */
-#optionTab{display:none;padding:10px}
+#optionTab{display:none;padding:10px;font-size:14px}
 
-.inline{
- display:flex;
- align-items:center;
- gap:10px;
- margin-top:10px;
-}
-.inline span:first-child{width:30px}
-.inline input{width:80px}
+.inline{margin-top:10px}
 
 .optBtn{
  border:1px solid #0f0;
@@ -118,11 +107,10 @@ video{width:100%;height:100%;object-fit:cover}
 
 <body>
 
-<!-- モーダル -->
 <div id="modal">
  <div class="modalBox">
   <h3>READMEの確認</h3>
-  <p>READMEをご確認ください。続行すると同意したものとみなされます。</p>
+  <p>READMEをご確認ください。</p>
   <button onclick="start()">OK</button>
   <button onclick="location.href='https://www.mod.go.jp/atla/'">キャンセル</button>
  </div>
@@ -134,8 +122,6 @@ video{width:100%;height:100%;object-fit:cover}
  <div id="tabMain" class="tab active" onclick="tab('main')">メイン</div>
  <div id="tabOpt" class="tab" onclick="tab('opt')">オプション</div>
 </div>
-
-<div class="topSpacer"></div>
 
 <!-- メイン -->
 <div id="mainTab">
@@ -159,10 +145,8 @@ video{width:100%;height:100%;object-fit:cover}
 
 <div id="formula">
  <input id="bl" placeholder="BL">
- <span>×</span>
- <span id="tanVal">--</span>
- <span>=</span>
- <span id="tAlti">--</span>
+ × <span id="tanVal">--</span>
+ = <span id="tAlti">--</span>
 </div>
 
 </div>
@@ -170,26 +154,19 @@ video{width:100%;height:100%;object-fit:cover}
 <!-- オプション -->
 <div id="optionTab">
 
+<div class="inline">AL = <input id="al" value="10"></div>
+<div class="inline">AE = <input id="ae" value="1.0"></div>
+
 <div class="inline">
- <span>AL</span><span>=</span>
- <input id="al" value="10">
+ Roll:(<span id="fRoll"></span>)
+ Yaw:(<span id="fYaw"></span>)
+ Pitch:(<span id="fPitch"></span>)
 </div>
 
 <div class="inline">
- <span>AE</span><span>=</span>
- <input id="ae" value="1.0">
-</div>
-
-<div class="inline">
- Roll:<span id="roll"></span>
- Yaw:<span id="yaw"></span>
- Pitch:<span id="pitch"></span>
-</div>
-
-<div class="inline">
- CR:<span id="cRoll"></span>
- CY:<span id="cYaw"></span>
- CP:<span id="cPitch"></span>
+ CR:(<span id="cRoll"></span>)
+ CY:(<span id="cYaw"></span>)
+ CP:(<span id="cPitch"></span>)
 </div>
 
 <div class="optBtn" id="csvBtn">CSVデータダウンロード</div>
@@ -202,7 +179,8 @@ video{width:100%;height:100%;object-fit:cover}
 let camOK=false,sensorOK=false;
 let Roll=0,Yaw=0,Pitch=0;
 let CRoll=0,CYaw=0,CPitch=0;
-let csv="";
+
+let csv="date,time,Roll,Yaw,Pitch,CRoll,CYaw,CPitch,FPitch,BL,TAlti\n";
 
 function start(){modal.style.display="none"}
 
@@ -215,12 +193,14 @@ function tab(t){
 
 /* カメラ */
 camBtn.onclick=async()=>{
- const s=await navigator.mediaDevices.getUserMedia({video:true});
+ const s=await navigator.mediaDevices.getUserMedia({
+  video:{facingMode:"environment"}
+ });
  video.srcObject=s;
  nosignal.style.display="none";
  reticle.style.display="block";
- camOK=true;
  camBtn.className="btn green";
+ camOK=true;
 };
 
 /* センサ */
@@ -234,33 +214,23 @@ sensorBtn.onclick=async()=>{
   Pitch=(e.beta||0)+90;
   Yaw=e.alpha||0;
  });
- sensorOK=true;
  sensorBtn.className="btn green";
+ sensorOK=true;
 };
 
-/* 更新 */
-setInterval(()=>{
- let active=false;
- let text="センサを許可してください";
-
- if(sensorOK){
-  text="ベースラインを入力してください";
-  if(bl.value){
-   text="計測";
-   active=true;
-  }
- }
-
- mainBtn.textContent=text;
- mainBtn.className="btn trigger "+(active?"green":"red");
+/* メインループ（軽量化） */
+function loop(){
 
  const BL=Number(bl.value)||0;
  const AE=Number(ae.value)||0;
+
+ const FRoll=Roll+CRoll;
+ const FYaw=Yaw+CYaw;
  const FPitch=Pitch+CPitch;
 
  const tanValNum=Math.tan(FPitch*Math.PI/180);
  const T=BL*tanValNum;
- const RAL=100*Math.tan((FPitch+AE)*Math.PI/180);
+ const RAL=100-(100*Math.tan((FPitch+AE)*Math.PI/180));
 
  tanVal.textContent=tanValNum.toFixed(2);
  tAlti.textContent=T.toFixed(2);
@@ -269,7 +239,15 @@ setInterval(()=>{
  hAlt.textContent=T.toFixed(1);
  hRal.textContent=RAL.toFixed(1);
 
- /* 色連動 */
+ fRoll.textContent=FRoll.toFixed(1);
+ fYaw.textContent=FYaw.toFixed(1);
+ fPitch.textContent=FPitch.toFixed(1);
+
+ cRoll.textContent=CRoll.toFixed(1);
+ cYaw.textContent=CYaw.toFixed(1);
+ cPitch.textContent=CPitch.toFixed(1);
+
+ /* 色 */
  if(RAL>Number(al.value)){
   hud.style.color="red";
   reticle.style.filter="hue-rotate(300deg)";
@@ -279,15 +257,23 @@ setInterval(()=>{
   reticle.style.filter="none";
   formula.style.color="#0f0";
  }
-},200);
+
+ /* ボタン状態 */
+ let active=false;
+ if(sensorOK && bl.value) active=true;
+
+ mainBtn.textContent= sensorOK ? (bl.value?"計測":"BL入力") : "センサ許可";
+ mainBtn.className="btn trigger "+(active?"green":"red");
+
+ requestAnimationFrame(loop);
+}
+loop();
 
 /* トリガー */
 mainBtn.onclick=()=>{
  if(mainBtn.className.includes("red"))return;
-
  const d=new Date();
- const row=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${Pitch+CPitch},${bl.value},${tAlti.textContent}\n`;
- csv+=row;
+ csv+=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${Pitch+CPitch},${bl.value},${tAlti.textContent}\n`;
 };
 
 /* CSV */
