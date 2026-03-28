@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARIS v0.3</title>
+<title>ARIS v0.3.1</title>
 
 <style>
 body{
@@ -13,11 +13,16 @@ body{
  color:#333;
 }
 
-/* モーダル */
+/* モーダル（最前面） */
 #modal{
- position:fixed;top:0;left:0;width:100%;height:100%;
+ position:fixed;
+ top:0;left:0;
+ width:100%;height:100%;
  background:rgba(0,0,0,.6);
- display:flex;justify-content:center;align-items:center;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ z-index:9999;
 }
 .modalBox{
  background:#fff;
@@ -27,20 +32,11 @@ body{
 }
 
 /* タイトル */
-header{
- padding:10px;
- font-size:20px;
-}
+header{padding:10px;font-size:20px}
 
 /* タブ */
-.tabs{
- display:flex;
- border-bottom:1px solid #ccc;
-}
-.tab{
- padding:8px 14px;
- cursor:pointer;
-}
+.tabs{display:flex;border-bottom:1px solid #ccc}
+.tab{padding:8px 14px;cursor:pointer}
 .tab.active{
  border-bottom:2px solid #007bff;
  font-weight:bold;
@@ -51,14 +47,21 @@ header{
 
 /* カメラ */
 #cameraArea{
- width:90vw;height:90vw;margin:auto;
+ width:90vw;height:90vw;
+ margin:auto;
  background:#ddd;
  border-radius:10px;
  overflow:hidden;
  position:relative;
+ z-index:1; /* モーダルより下 */
 }
-video{width:100%;height:100%;object-fit:cover}
+video{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+}
 
+/* No Signal */
 #nosignal{
  position:absolute;
  top:50%;left:50%;
@@ -69,8 +72,12 @@ video{width:100%;height:100%;object-fit:cover}
 /* HUD */
 #hud{
  position:absolute;
- right:10px;bottom:10px;
+ right:10px;
+ bottom:10px;
  font-size:14px;
+ background:rgba(255,255,255,0.6);
+ padding:5px;
+ border-radius:6px;
 }
 
 /* ボタン */
@@ -85,10 +92,7 @@ video{width:100%;height:100%;object-fit:cover}
  border-radius:8px;
  text-align:center;
 }
-.trigger{
- flex:2;
- font-weight:bold;
-}
+.trigger{flex:2;font-weight:bold}
 
 .red{background:#dc3545;color:#fff}
 .green{background:#28a745;color:#fff}
@@ -132,6 +136,7 @@ input{
 
 <body>
 
+<!-- モーダル -->
 <div id="modal">
  <div class="modalBox">
   <h3>READMEの確認</h3>
@@ -156,9 +161,11 @@ input{
 <div id="cameraArea">
  <video id="video" autoplay playsinline></video>
  <div id="nosignal">No Signal</div>
+
  <div id="hud">
-  Alt:<span id="hAlt">--</span><br>
-  Dev:<span id="hRal">--</span>
+  Range:<span id="hBL">--</span><br>
+  Alti:<span id="hAlt">--</span><br>
+  MaxDev:<span id="hRal">--</span>
  </div>
 </div>
 
@@ -199,7 +206,6 @@ input{
  CP:(<span id="cPitch"></span>)
 </div>
 
-<div class="optBtn" id="csvBtn">CSVダウンロード</div>
 <div class="optBtn" id="calBtn">キャリブレーション</div>
 
 </div>
@@ -209,10 +215,8 @@ let Roll=0,Yaw=0,Pitch=0;
 let CRoll=0,CYaw=0,CPitch=0;
 let sensorOK=false;
 
-/* モーダル */
 function start(){modal.style.display="none"}
 
-/* タブ */
 function tab(t){
  mainTab.style.display=(t==="main")?"block":"none";
  optionTab.style.display=(t==="opt")?"block":"none";
@@ -249,16 +253,16 @@ sensorBtn.onclick=async()=>{
 function loop(){
  const BL=Number(bl.value)||0;
  const AE=Number(ae.value)||0;
-
  const FPitch=Pitch+CPitch;
 
- const tanVal=Math.tan(FPitch*Math.PI/180);
-
+ const T=BL*Math.tan(FPitch*Math.PI/180);
  const RAL=((100*Math.tan((FPitch+AE)*Math.PI/180))/(100*Math.tan(FPitch*Math.PI/180))*100)-100;
 
+ hBL.textContent=BL;
+ hAlt.textContent=T.toFixed(1);
  hRal.textContent=RAL.toFixed(1);
 
- fpDisp.textContent=`${FPitch.toFixed(1)}°(${tanVal.toFixed(2)})`;
+ fpDisp.textContent=`${FPitch.toFixed(1)}°(${Math.tan(FPitch*Math.PI/180).toFixed(2)})`;
 
  fRoll.textContent=(Roll+CRoll).toFixed(1);
  fYaw.textContent=(Yaw+CYaw).toFixed(1);
