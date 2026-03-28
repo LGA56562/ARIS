@@ -230,7 +230,7 @@ function loop(){
 
  const tanValNum=Math.tan(FPitch*Math.PI/180);
  const T=BL*tanValNum;
- const RAL=100-(100*Math.tan((FPitch+AE)*Math.PI/180));
+ const RAL=(100*Math.tan((FPitch+AE)*Math.PI/180)) - 100;
 
  tanVal.textContent=tanValNum.toFixed(2);
  tAlti.textContent=T.toFixed(2);
