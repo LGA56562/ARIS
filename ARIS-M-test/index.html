@@ -10,7 +10,7 @@ body{
  margin:0;
  font-family:sans-serif;
  background:#f5f5f5;
- color:#222;
+ color:#333;
 }
 
 /* モーダル */
@@ -18,14 +18,19 @@ body{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:rgba(0,0,0,.6);
  display:flex;justify-content:center;align-items:center;
- z-index:999;
 }
 .modalBox{
- background:#fff;padding:20px;border-radius:8px;
+ background:#fff;
+ padding:20px;
+ border-radius:10px;
+ width:80%;
 }
 
 /* タイトル */
-header{padding:10px;font-size:18px}
+header{
+ padding:10px;
+ font-size:20px;
+}
 
 /* タブ */
 .tabs{
@@ -33,90 +38,94 @@ header{padding:10px;font-size:18px}
  border-bottom:1px solid #ccc;
 }
 .tab{
- padding:8px 16px;
+ padding:8px 14px;
  cursor:pointer;
 }
 .tab.active{
- border-bottom:3px solid #007bff;
+ border-bottom:2px solid #007bff;
  font-weight:bold;
 }
 
-/* カメラ上スペース */
-.topSpace{height:10px}
+/* スペース */
+.topSpacer{height:10px}
 
 /* カメラ */
 #cameraArea{
  width:90vw;height:90vw;margin:auto;
  background:#ddd;
+ border-radius:10px;
+ overflow:hidden;
  position:relative;
 }
 video{width:100%;height:100%;object-fit:cover}
 
-/* No Signal */
 #nosignal{
- position:absolute;top:50%;left:50%;
+ position:absolute;
+ top:50%;left:50%;
  transform:translate(-50%,-50%);
- color:#555;
+ color:#666;
 }
-
-/* レティクル */
-#reticle{
- position:absolute;top:50%;left:50%;
- width:60px;height:60px;
- transform:translate(-50%,-50%);
- display:none;
-}
-#reticle::before,#reticle::after{
- content:"";position:absolute;background:#00aa00;
-}
-#reticle::before{width:100%;height:2px;top:50%}
-#reticle::after{height:100%;width:2px;left:50%}
 
 /* HUD */
 #hud{
- position:absolute;right:10px;bottom:10px;
+ position:absolute;
+ right:10px;bottom:10px;
  font-size:14px;
 }
 
 /* ボタン */
 .controls{
- display:flex;gap:10px;padding:10px;
+ display:flex;
+ gap:10px;
+ padding:10px;
 }
-button{
+.btn{
  flex:1;
  padding:10px;
- border-radius:6px;
- border:1px solid #ccc;
- background:#eee;
- cursor:pointer;
+ border-radius:8px;
+ text-align:center;
 }
-#mainBtn{
+.trigger{
  flex:2;
+ font-weight:bold;
+}
+
+.red{background:#dc3545;color:#fff}
+.green{background:#28a745;color:#fff}
+
+/* 計算欄 */
+#formula{
+ margin:10px;
+ padding:12px;
+ background:#fff;
+ border-radius:10px;
  font-size:16px;
 }
 
-/* 計算表示 */
-#formula{
- padding:12px;
- font-size:18px;
- background:#fff;
- margin:10px;
+/* 入力 */
+input{
+ padding:8px;
  border-radius:6px;
- text-align:center;
+ border:1px solid #ccc;
+ width:80px;
 }
 
 /* オプション */
 #optionTab{display:none;padding:10px}
 
-.inline{margin-top:10px}
-
-.optBtn{
- margin-top:10px;
+.card{
+ background:#fff;
  padding:10px;
- background:#eee;
- border-radius:6px;
+ border-radius:10px;
+ margin-top:10px;
+}
+.optBtn{
+ background:#fff;
+ border:1px solid #ccc;
+ padding:10px;
+ margin-top:10px;
+ border-radius:8px;
  text-align:center;
- cursor:pointer;
 }
 </style>
 </head>
@@ -139,7 +148,7 @@ button{
  <div id="tabOpt" class="tab" onclick="tab('opt')">オプション</div>
 </div>
 
-<div class="topSpace"></div>
+<div class="topSpacer"></div>
 
 <!-- メイン -->
 <div id="mainTab">
@@ -147,59 +156,63 @@ button{
 <div id="cameraArea">
  <video id="video" autoplay playsinline></video>
  <div id="nosignal">No Signal</div>
- <div id="reticle"></div>
  <div id="hud">
-  BL:<span id="hBL">--</span><br>
   Alt:<span id="hAlt">--</span><br>
   Dev:<span id="hRal">--</span>
  </div>
 </div>
 
 <div class="controls">
- <button id="camBtn">カメラ</button>
- <button id="sensorBtn">センサ</button>
- <button id="mainBtn">センサを許可してください</button>
+ <div id="camBtn" class="btn red">カメラ</div>
+ <div id="sensorBtn" class="btn red">センサ</div>
+ <div id="mainBtn" class="btn trigger red">センサ許可</div>
 </div>
 
-<div id="formula">NaN</div>
+<div id="formula">
+ <input id="bl" placeholder="BL">
+ × <span id="fpDisp">--</span>
+ = <span id="tAlti">NaN</span>
+</div>
 
 </div>
 
 <!-- オプション -->
 <div id="optionTab">
 
-<div class="inline">AL = <input id="al" value="10"></div>
-<div class="inline">AE = <input id="ae" value="1.0"></div>
+<div class="card">
+ AL = <input id="al" value="10">
+</div>
 
-<div class="inline">
+<div class="card">
+ AE = <input id="ae" value="1.0">
+</div>
+
+<div class="card">
  Roll:(<span id="fRoll"></span>)
  Yaw:(<span id="fYaw"></span>)
  Pitch:(<span id="fPitch"></span>)
 </div>
 
-<div class="inline">
+<div class="card">
  CR:(<span id="cRoll"></span>)
  CY:(<span id="cYaw"></span>)
  CP:(<span id="cPitch"></span>)
 </div>
 
-<div class="optBtn" id="csvBtn">CSVデータダウンロード</div>
+<div class="optBtn" id="csvBtn">CSVダウンロード</div>
 <div class="optBtn" id="calBtn">キャリブレーション</div>
-<div class="optBtn" onclick="window.open('https://www.mod.go.jp/atla/')">フィードバック</div>
 
 </div>
 
 <script>
-let camOK=false,sensorOK=false;
 let Roll=0,Yaw=0,Pitch=0;
 let CRoll=0,CYaw=0,CPitch=0;
+let sensorOK=false;
 
-let lastT = NaN;
-
-let csv="date,time,Roll,Yaw,Pitch,CRoll,CYaw,CPitch,FPitch,BL,TAlti\n";
-
+/* モーダル */
 function start(){modal.style.display="none"}
 
+/* タブ */
 function tab(t){
  mainTab.style.display=(t==="main")?"block":"none";
  optionTab.style.display=(t==="opt")?"block":"none";
@@ -214,8 +227,7 @@ camBtn.onclick=async()=>{
  });
  video.srcObject=s;
  nosignal.style.display="none";
- reticle.style.display="block";
- camOK=true;
+ camBtn.className="btn green";
 };
 
 /* センサ */
@@ -229,32 +241,28 @@ sensorBtn.onclick=async()=>{
   Pitch=(e.beta||0)-90;
   Yaw=e.alpha||0;
  });
+ sensorBtn.className="btn green";
  sensorOK=true;
 };
 
-/* 更新 */
+/* ループ */
 function loop(){
- const BL=Number(bl?.value)||0;
+ const BL=Number(bl.value)||0;
  const AE=Number(ae.value)||0;
 
- const FRoll=Roll+CRoll;
- const FYaw=Yaw+CYaw;
  const FPitch=Pitch+CPitch;
 
  const tanVal=Math.tan(FPitch*Math.PI/180);
- const RAL=(100*Math.tan((FPitch+AE)*Math.PI/180))-100;
 
- hBL.textContent=BL;
- hAlt.textContent=isNaN(lastT)?"--":lastT.toFixed(2);
+ const RAL=((100*Math.tan((FPitch+AE)*Math.PI/180))/(100*Math.tan(FPitch*Math.PI/180))*100)-100;
+
  hRal.textContent=RAL.toFixed(1);
 
- fRoll.textContent=FRoll.toFixed(1);
- fYaw.textContent=FYaw.toFixed(1);
- fPitch.textContent=FPitch.toFixed(1);
+ fpDisp.textContent=`${FPitch.toFixed(1)}°(${tanVal.toFixed(2)})`;
 
- cRoll.textContent=CRoll.toFixed(1);
- cYaw.textContent=CYaw.toFixed(1);
- cPitch.textContent=CPitch.toFixed(1);
+ fRoll.textContent=(Roll+CRoll).toFixed(1);
+ fYaw.textContent=(Yaw+CYaw).toFixed(1);
+ fPitch.textContent=FPitch.toFixed(1);
 
  requestAnimationFrame(loop);
 }
@@ -262,29 +270,13 @@ loop();
 
 /* トリガー */
 mainBtn.onclick=()=>{
+ if(!sensorOK || !bl.value)return;
+
  const BL=Number(bl.value);
- if(!sensorOK || !BL) return;
-
  const FPitch=Pitch+CPitch;
- const tanVal=Math.tan(FPitch*Math.PI/180);
- const T=BL*tanVal;
+ const T=BL*Math.tan(FPitch*Math.PI/180);
 
- lastT=T;
-
- formula.textContent =
- `${BL} × ${FPitch.toFixed(1)}°(${tanVal.toFixed(2)}) = ${T.toFixed(2)}`;
-
- const d=new Date();
- csv+=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${FPitch},${BL},${T}\n`;
-};
-
-/* CSV */
-csvBtn.onclick=()=>{
- const blob=new Blob([csv]);
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download="log.csv";
- a.click();
+ tAlti.textContent=T.toFixed(2);
 };
 
 /* キャリブレーション */
