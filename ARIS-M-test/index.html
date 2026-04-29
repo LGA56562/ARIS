@@ -8,7 +8,6 @@
 <style>
 body{margin:0;font-family:sans-serif;background:#f5f5f5}
 
-/* モーダル */
 #modal{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:rgba(0,0,0,.6);
@@ -17,12 +16,10 @@ body{margin:0;font-family:sans-serif;background:#f5f5f5}
 }
 .modalBox{background:#fff;padding:20px;border-radius:10px;width:80%}
 
-/* タブ */
 .tabs{display:flex;border-bottom:1px solid #ccc}
 .tab{padding:8px 14px;cursor:pointer}
 .tab.active{border-bottom:2px solid #007bff;font-weight:bold}
 
-/* カメラ */
 #cameraArea{
  width:90vw;height:90vw;margin:auto;
  background:#ddd;border-radius:10px;
@@ -35,7 +32,6 @@ video{width:100%;height:100%;object-fit:cover}
  transform:translate(-50%,-50%);
 }
 
-/* レティクル */
 #reticle{
  position:absolute;top:50%;left:50%;
  width:60px;height:60px;
@@ -48,32 +44,27 @@ video{width:100%;height:100%;object-fit:cover}
 #reticle::before{width:100%;height:2px;top:50%}
 #reticle::after{height:100%;width:2px;left:50%}
 
-/* HUD */
 #hud{
  position:absolute;right:10px;bottom:10px;
  background:rgba(255,255,255,.7);
  padding:6px;border-radius:6px;
 }
 
-/* ボタン */
 .controls{display:flex;gap:10px;padding:10px}
 .btn{flex:1;padding:10px;border-radius:8px;text-align:center}
 .trigger{flex:2;font-weight:bold}
 .red{background:#dc3545;color:#fff}
 .green{background:#28a745;color:#fff}
 
-/* 式 */
 #formula{
  margin:10px;padding:12px;
  background:#fff;border-radius:10px;
 }
 
-/* オプション */
 #optionTab{display:none;padding:10px}
 .card{background:#fff;padding:10px;border-radius:10px;margin-top:10px}
 .optBtn{border:1px solid #ccc;padding:10px;margin-top:10px;border-radius:8px;text-align:center}
 
-/* フッター */
 footer{
  text-align:center;
  padding:10px;
@@ -88,9 +79,12 @@ footer{
 <div id="modal">
  <div class="modalBox">
   <h3>READMEの確認</h3>
-  <p>READMEをご確認ください。</p>
+  <p>
+  READMEをご確認ください。<br>
+  続行すると、その内容および免責事項に同意したものとみなされます
+  </p>
   <button onclick="start()">OK</button>
-  <button onclick="location.href='https://www.mod.go.jp/atla/'">キャンセル</button>
+  <button onclick="location.href='https://github.com/LGA56562/ARIS'">キャンセル</button>
  </div>
 </div>
 
@@ -103,7 +97,6 @@ footer{
 
 <div style="height:10px"></div>
 
-<!-- メイン -->
 <div id="mainTab">
 
 <div id="cameraArea">
@@ -121,18 +114,17 @@ footer{
 <div class="controls">
  <div id="camBtn" class="btn red">カメラ</div>
  <div id="sensorBtn" class="btn red">センサ</div>
- <div id="mainBtn" class="btn trigger red">センサ許可</div>
+ <div id="mainBtn" class="btn trigger red">センサを許可してください</div>
 </div>
 
 <div id="formula">
- <input id="bl" placeholder="BL">
+ <input id="bl" placeholder="ベースライン（m）">
  × <span id="fpDisp">--</span>
  = <span id="tAlti">NaN</span>
 </div>
 
 </div>
 
-<!-- オプション -->
 <div id="optionTab">
 
 <div class="card">AL = <input id="al" value="10"></div>
@@ -152,7 +144,7 @@ footer{
 
 <div class="optBtn" id="csvBtn">CSVデータダウンロード</div>
 <div class="optBtn" id="calBtn">キャリブレーション</div>
-<div class="optBtn" onclick="window.open('https://www.mod.go.jp/atla/')">フィードバック</div>
+<div class="optBtn" onclick="window.open('https://forms.gle/ybAPSM3uGGtnHgnt9')">フィードバックの送信</div>
 
 </div>
 
@@ -177,18 +169,14 @@ function tab(t){
  tabOpt.classList.toggle("active",t==="opt");
 }
 
-/* カメラ */
 camBtn.onclick=async()=>{
- const s=await navigator.mediaDevices.getUserMedia({
-  video:{facingMode:"environment"}
- });
+ const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
  video.srcObject=s;
  nosignal.style.display="none";
  reticle.style.display="block";
  camBtn.className="btn green";
 };
 
-/* センサ */
 sensorBtn.onclick=async()=>{
  if(DeviceOrientationEvent.requestPermission){
   const r=await DeviceOrientationEvent.requestPermission();
@@ -196,44 +184,64 @@ sensorBtn.onclick=async()=>{
  }
  window.addEventListener("deviceorientation",e=>{
   Roll=e.gamma||0;
-  Pitch=(e.beta||0)-90;
+  Pitch=(e.beta||0)+90;
   Yaw=e.alpha||0;
  });
  sensorBtn.className="btn green";
  sensorOK=true;
 };
 
-/* ループ */
+function updateMainBtn(){
+ if(!sensorOK){
+  mainBtn.textContent="センサを許可してください";
+  mainBtn.className="btn trigger red";
+ }
+ else if(!bl.value){
+  mainBtn.textContent="ベースラインを入力してください";
+  mainBtn.className="btn trigger red";
+ }
+ else{
+  mainBtn.textContent="計測";
+  mainBtn.className="btn trigger green";
+ }
+}
+
 function loop(){
  const BL=Number(bl.value)||0;
  const AE=Number(ae.value)||0;
  const FPitch=Pitch+CPitch;
 
- const tanVal=Math.tan(FPitch*Math.PI/180);
-
- const RAL=((100*Math.tan((FPitch+AE)*Math.PI/180))/(100*Math.tan(FPitch*Math.PI/180))*100)-100;
+ const R_Alti = BL * Math.tan((FPitch * 3.14) / 180);
+ const RAL = R_Alti - (BL * Math.tan(((FPitch + AE) * 3.14) / 180));
 
  hBL.textContent=BL;
- hAlt.textContent=(BL*tanVal).toFixed(1);
+ hAlt.textContent=R_Alti.toFixed(1);
  hRal.textContent=RAL.toFixed(1);
 
- fpDisp.textContent=`${FPitch.toFixed(1)}°(${tanVal.toFixed(2)})`;
+ fpDisp.textContent=`tan((${FPitch.toFixed(1)} * 3.14)/180)`;
 
  fRoll.textContent=(Roll+CRoll).toFixed(1);
  fYaw.textContent=(Yaw+CYaw).toFixed(1);
  fPitch.textContent=FPitch.toFixed(1);
 
+ const ALv = Number(al.value)||0;
+ const alert = Math.abs(RAL) > ALv;
+ const color = alert ? "#ff3030" : "#00ff00";
+
+ reticle.style.filter = `drop-shadow(0 0 4px ${color})`;
+ hud.style.color = color;
+
+ updateMainBtn();
  requestAnimationFrame(loop);
 }
 loop();
 
-/* トリガー */
 mainBtn.onclick=()=>{
  if(!sensorOK || !bl.value)return;
 
  const BL=Number(bl.value);
  const FPitch=Pitch+CPitch;
- const T=BL*Math.tan(FPitch*Math.PI/180);
+ const T=BL*Math.tan((FPitch*3.14)/180);
 
  tAlti.textContent=T.toFixed(2);
 
@@ -241,16 +249,14 @@ mainBtn.onclick=()=>{
  csv+=`${d.getMonth()+1}${d.getDate()},${d.toTimeString().slice(0,8)},${Roll},${Yaw},${Pitch},${CRoll},${CYaw},${CPitch},${FPitch},${BL},${T}\n`;
 };
 
-/* CSV */
 csvBtn.onclick=()=>{
  const blob=new Blob([csv]);
  const a=document.createElement("a");
  a.href=URL.createObjectURL(blob);
- a.download="log.csv";
+ a.download="aris_m_log.csv";
  a.click();
 };
 
-/* キャリブレーション */
 calBtn.onclick=()=>{
  CRoll=Roll;
  CYaw=Yaw;
