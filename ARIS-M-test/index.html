@@ -228,7 +228,11 @@ function loop(){
 
  fRoll.textContent=(FRoll).toFixed(1);
  fYaw.textContent=(FYaw).toFixed(1);
- fPitch.textContent=FPitch.toFixed(1);
+ fPitch.textContent=(FPitch).toFixed(1);
+
+ cRoll.textContent = CRoll.toFixed(1);
+ cYaw.textContent  = CYaw.toFixed(1);
+ cPitch.textContent = CPitch.toFixed(1);
 
  const ALv = Number(al.value)||0;
  const alert = Math.abs(RAL) > ALv;
