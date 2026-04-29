@@ -121,7 +121,7 @@ footer{
  <input id="bl" placeholder="ベースライン（m）">
  × <span id="fpDisp">--</span>
  ＝ 
- <span style="font-size:12px;">T-Alti:</span>
+ </span>
  <span id="tAlti" style="font-size:24px; color:#ff3030; font-weight:bold;">
   NaN
  </span> m
@@ -213,7 +213,9 @@ function updateMainBtn(){
 function loop(){
  const BL=Number(bl.value)||0;
  const AE=Number(ae.value)||0;
- const FPitch=Pitch+CPitch;
+ const FRoll = Roll + CRoll;
+ const FYaw = Yaw + CYaw;
+ const FPitch = Pitch + CPitch;
 
  const R_Alti = BL * Math.tan((FPitch * 3.14) / 180);
  const RAL = R_Alti - (BL * Math.tan(((FPitch + AE) * 3.14) / 180));
@@ -224,8 +226,8 @@ function loop(){
 
  fpDisp.textContent=`tan((${FPitch.toFixed(1)} * 3.14)/180)`;
 
- fRoll.textContent=(Roll+CRoll).toFixed(1);
- fYaw.textContent=(Yaw+CYaw).toFixed(1);
+ fRoll.textContent=(FRoll).toFixed(1);
+ fYaw.textContent=(FYaw).toFixed(1);
  fPitch.textContent=FPitch.toFixed(1);
 
  const ALv = Number(al.value)||0;
