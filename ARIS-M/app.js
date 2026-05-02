@@ -3,7 +3,6 @@ const APP_VERSION = "1.0.0";
 document.addEventListener("DOMContentLoaded",()=>{
  document.getElementById("version").textContent = APP_VERSION;
 });
-// ▲ ここだけ追加
 
 let Roll=0,Yaw=0,Pitch=0;
 let CRoll=0,CYaw=0,CPitch=0;
