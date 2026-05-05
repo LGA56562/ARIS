@@ -1,6 +1,6 @@
 # 📱ARIS-M
 Angular Ranging Integrated System - Mobile
-![サンプル画像](ARIS-M/images/sample.png)  
+![サンプル画像](images/sample.png)  
 ## 概要
 ARIS-Mはスマートフォンやタブレット等で動作する簡易高度計測ツールです。任意のベースライン（射点-観測点までの距離）を入力し、端末をロケットに向けて計測を実行します。  
 
