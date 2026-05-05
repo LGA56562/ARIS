@@ -26,7 +26,7 @@ HTMLで動作するため、スマートフォンやタブレットといったw
 特殊な方法によって高度を算出することで風による機体の流され量を考慮した高度の算出を行います。
 本ツールはPCでの動作を想定しています。
 
-[詳細はこちらから（建造中につきダミー）](https://youtu.be/dQw4w9WgXcQ?si=TVJFQpvxbWlWajmD "ダミーのTwitter")
+[詳細はこちらから（建造中につきダミー）](https://youtu.be/dQw4w9WgXcQ?si=TVJFQpvxbWlWajmD)
 ## ✉フィードバックについて
 ツールの不具合などに関するフィードバックを募集しています。
 ご協力いただける方は[こちら](https://forms.gle/ybAPSM3uGGtnHgnt9 "フィードバックフォーム")のGoogleフォームより送信してください。
